@@ -1,7 +1,5 @@
 class Sokoban
 
-  @@actions = ['up', 'down', 'left', 'right', 'quit']
-
   def initialize(path)
     if !Gameboard.file_exists?(path)
       puts "File doesn't exist, cannot import level"
@@ -22,8 +20,8 @@ class Sokoban
 
   def get_action
     action = nil
-    until @@actions.include?(action)
-      puts "Allowed actions: " + @@actions.join(", ") if action
+    until GameConfig::actions.keys.include?(action)
+      puts "Allowed actions: " + GameConfig::actions.keys.join(", ") if action
       print "> "
       action = gets.chomp.downcase.strip
       # args = gets.chomp.downcase.strip.split(' ')
@@ -33,28 +31,34 @@ class Sokoban
   end
 
   def perform_action(action)
-    case action
-      when "quit"
-        return :quit
-      when "left"
-      when "right"
-      when "down"
-      when "up"
-        move_player(action)
-    end
+    actions_symbol = GameConfig::actions[action]
+    return nil if actions_symbol == nil
+    return actions_symbol if actions_symbol == :quit
+
+    move_player(actions_symbol)
   end
 
   def move_player(direction)
-    @gameboard.move_player(direction)
+    success = @gameboard.move_player(direction)
+    if !success
+      puts "Move not allowed, try again"
+    else
+      puts "Success"
+      print_current_gameboard
+    end
   end
 
   def intro
     puts "\n\n>> Welcome to Sokoban <<\n\n"
-    @gameboard.print_level
+    print_current_gameboard
   end
 
   def outro
     puts "\n\n>> Goodbye and Goodnight <<\n\n"
+  end
+
+  def print_current_gameboard
+    @gameboard.print_level
   end
 
 end
